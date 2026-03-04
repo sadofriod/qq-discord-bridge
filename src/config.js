@@ -12,6 +12,7 @@ const config = {
   GROUP_MAPPINGS: process.env.GROUP_MAPPINGS,
   FILTER_KEYWORDS: process.env.FILTER_KEYWORDS || '',
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+  LOG_DIR: process.env.LOG_DIR || './logs',
 };
 const missing = REQUIRED_KEYS.filter(key => !config[key]);
 if (missing.length > 0) {
