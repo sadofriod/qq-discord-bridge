@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "oicq": "^2.3.4",
+    "qq-guild-bot": "^2.9.5",
     "discord.js": "^14.14.1",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1",
