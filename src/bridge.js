@@ -16,6 +16,27 @@ function parseGroupMappings(raw) {
   return mappings;
 }
 
+async function forwardToDiscord(discordBot, channelId, senderName, text) {
+  try {
+    if (config.DISCORD_WEBHOOK_URL) {
+      await axios.post(config.DISCORD_WEBHOOK_URL, {
+        username: senderName,
+        content: text,
+        avatar_url: config.DEFAULT_AVATAR_URL,
+      });
+    } else {
+      const channel = discordBot.channels.cache.get(channelId);
+      if (channel) {
+        await channel.send(`**[${senderName}]**: ${text}`);
+      } else {
+        logger.warn(`Discord 频道未找到: ${channelId}`);
+      }
+    }
+  } catch (err) {
+    logger.error('消息转发失败:', err.message);
+  }
+}
+
 function createBridge(qqBot, discordBot) {
   const groupMappings = parseGroupMappings(config.GROUP_MAPPINGS);
   const filterKeywords = config.FILTER_KEYWORDS
@@ -33,26 +54,7 @@ function createBridge(qqBot, discordBot) {
     if (filterKeywords.some((kw) => text.includes(kw))) return;
 
     const senderName = event.sender.card || event.sender.nickname || String(event.sender.user_id);
-    const content = `**[${senderName}]**: ${text}`;
-
-    try {
-      if (config.DISCORD_WEBHOOK_URL) {
-        await axios.post(config.DISCORD_WEBHOOK_URL, {
-          username: senderName,
-          content: text,
-          avatar_url: config.DEFAULT_AVATAR_URL,
-        });
-      } else {
-        const channel = discordBot.channels.cache.get(channelId);
-        if (channel) {
-          await channel.send(content);
-        } else {
-          logger.warn(`Discord 频道未找到: ${channelId}`);
-        }
-      }
-    } catch (err) {
-      logger.error('消息转发失败:', err.message);
-    }
+    await forwardToDiscord(discordBot, channelId, senderName, text);
   });
 
   return {
@@ -62,4 +64,37 @@ function createBridge(qqBot, discordBot) {
   };
 }
 
-module.exports = { createBridge };
+function createOfficialBridge(qqBot, discordBot) {
+  const groupMappings = parseGroupMappings(config.GROUP_MAPPINGS);
+  const filterKeywords = config.FILTER_KEYWORDS
+    ? config.FILTER_KEYWORDS.split(',').map((k) => k.trim()).filter(Boolean)
+    : [];
+
+  logger.info(`频道映射 (官方Bot): ${JSON.stringify(groupMappings)}`);
+
+  const handleMessage = async (data) => {
+    const msg = data.msg || data;
+    const channelId = String(msg.channel_id || '');
+    const discordChannelId = groupMappings[channelId];
+    if (!discordChannelId) return;
+
+    const text = (msg.content || '').trim();
+    if (!text) return;
+    if (filterKeywords.some((kw) => text.includes(kw))) return;
+
+    const senderName = (msg.author && (msg.author.username || msg.author.id)) || `QQ用户-${msg.id || Date.now()}`;
+    await forwardToDiscord(discordBot, discordChannelId, senderName, text);
+  };
+
+  qqBot.on('GUILD_MESSAGES', handleMessage);
+  qqBot.on('PUBLIC_GUILD_MESSAGES', handleMessage);
+
+  return {
+    stop() {
+      qqBot.removeListener('GUILD_MESSAGES', handleMessage);
+      qqBot.removeListener('PUBLIC_GUILD_MESSAGES', handleMessage);
+    },
+  };
+}
+
+module.exports = { createBridge, createOfficialBridge };
