@@ -7,8 +7,19 @@ services:
     image: qq-discord-bridge:latest
     container_name: qq-discord-bridge
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      - QQ_ACCOUNT=${QQ_ACCOUNT}
+      - QQ_PASSWORD=${QQ_PASSWORD}
+      - QQ_PLATFORM=${QQ_PLATFORM:-1}
+      - QQ_DATA_DIR=${QQ_DATA_DIR:-/app/data/qq}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID:-}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - DEFAULT_AVATAR_URL=${DEFAULT_AVATAR_URL:-https://q1.qlogo.cn/g?b=qq&nk=10000&s=100}
+      - GROUP_MAPPINGS=${GROUP_MAPPINGS}
+      - FILTER_KEYWORDS=${FILTER_KEYWORDS:-}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_DIR=${LOG_DIR:-/app/logs}
     volumes:
       - ./data/qq:/app/data/qq
       - ./logs:/app/logs

@@ -1,5 +1,4 @@
 'use strict';
-require('dotenv').config();
 const { createQQBot } = require('./qqBot');
 const { createDiscordBot } = require('./discordBot');
 const { createBridge } = require('./bridge');
