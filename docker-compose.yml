@@ -8,10 +8,14 @@ services:
     container_name: qq-discord-bridge
     restart: unless-stopped
     environment:
+      - QQ_BOT_TYPE=${QQ_BOT_TYPE:-oicq}
       - QQ_ACCOUNT=${QQ_ACCOUNT}
       - QQ_PASSWORD=${QQ_PASSWORD}
       - QQ_PLATFORM=${QQ_PLATFORM:-1}
       - QQ_DATA_DIR=${QQ_DATA_DIR:-/app/data/qq}
+      - QQ_APP_ID=${QQ_APP_ID:-}
+      - QQ_APP_TOKEN=${QQ_APP_TOKEN:-}
+      - QQ_BOT_SANDBOX=${QQ_BOT_SANDBOX:-false}
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID:-}
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}

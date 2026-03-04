@@ -26,6 +26,15 @@ const oicqRequired = ['QQ_ACCOUNT'];
 const officialRequired = ['QQ_APP_ID', 'QQ_APP_TOKEN'];
 
 const modeRequired = config.QQ_BOT_TYPE === 'official' ? officialRequired : oicqRequired;
+
+const validBotTypes = ['oicq', 'official'];
+if (!validBotTypes.includes(config.QQ_BOT_TYPE)) {
+  console.error(
+    `Invalid QQ_BOT_TYPE "${config.QQ_BOT_TYPE}". Supported values are: ${validBotTypes.join(', ')}.`
+  );
+  process.exit(1);
+}
+
 const missing = [...alwaysRequired, ...modeRequired].filter(key => !config[key]);
 if (missing.length > 0) {
   console.error('Missing required env vars: ' + missing.join(', '));
