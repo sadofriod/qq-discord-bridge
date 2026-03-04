@@ -7,7 +7,17 @@ const fs = require('fs');
 const path = require('path');
 
 async function createQQBot() {
-  const qqNumber = parseInt(config.QQ_ACCOUNT);
+  const qqNumber = Number(config.QQ_ACCOUNT);
+  if (!Number.isInteger(qqNumber) || qqNumber <= 0) {
+    logger.error('配置错误: QQ_ACCOUNT 必须是有效的数字账号');
+    throw new Error('无效的 QQ_ACCOUNT 配置，必须是数字。');
+  }
+
+  const platform = Number(config.QQ_PLATFORM);
+  if (!Number.isInteger(platform) || platform <= 0) {
+    logger.error('配置错误: QQ_PLATFORM 必须是有效的数字平台标识');
+    throw new Error('无效的 QQ_PLATFORM 配置，必须是数字。');
+  }
 
   const dataDir = path.resolve(config.QQ_DATA_DIR || './data/qq');
   fs.mkdirSync(dataDir, { recursive: true });
@@ -15,7 +25,7 @@ async function createQQBot() {
   const client = createClient(qqNumber, {
     log_level: 'warn',
     data_dir: dataDir,
-    platform: parseInt(config.QQ_PLATFORM || '1'),
+    platform: platform,
   });
 
   return new Promise((resolve, reject) => {
